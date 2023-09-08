@@ -10,7 +10,7 @@ windows:
   - gazebo:
       layout: tiled
       panes:
-        - waitForRos; roslaunch mrs_simulation simulation.launch world_name:=forest gui:=true
+        - waitForRos; roslaunch mrs_simulation simulation.launch world_name:=forest gui:=false
         - waitForOdometry; gz camera -c gzclient_camera -f uav1; history -s gz camera -c gzclient_camera -f uav1
   - status:
       layout: tiled
@@ -29,17 +29,20 @@ windows:
   - mapplan:
       layout: tiled
       panes:
-        - waitForOdometry; roslaunch octomap_mapping_planning mapplan.launch config_octomap:=./custom_configs/octomap.yaml config_pcl_filter_ouster:=./custom_configs/ouster_filter_mapping.yaml config_pathfinder:=./custom_configs/pathfinder.yaml config_trajectory_generation:=./custom_configs/trajectory_generation.yaml config_pcl_filter_rs_front:=./custom_configs/rs_front_filter.yaml config_pcl_filter_rs_down:=./custom_configs/rs_down_filter.yaml
-  - map:
-      layout: tiled
-      panes:
-        - 'history -s rosservice call /uav1/octomap_server/save_map example'
-        - 'history -s rosservice call /uav1/octomap_server/load_map example'
-  - goto:
-      layout: tiled
-      panes:
-        - 'history -s rosservice call /$UAV_NAME/pathfinder/goto \"goal: \[60.0, 0.0, 2.5, 0.0\]\";
-           history -s rosservice call /$UAV_NAME/pathfinder/goto \"goal: \[-60.0, 0.0, 2.5, 0.0\]\"'
+        # - source user_ros_workspace/devel/setup.bash && waitForOdometry; roslaunch octomap_mapping_planning mapplan.launch config_octomap:=./custom_configs/octomap.yaml config_pcl_filter_ouster:=./custom_configs/ouster_filter_mapping.yaml config_pathfinder:=./custom_configs/pathfinder.yaml config_trajectory_generation:=./custom_configs/trajectory_generation.yaml config_pcl_filter_rs_front:=./custom_configs/rs_front_filter.yaml config_pcl_filter_rs_down:=./custom_configs/rs_down_filter.yaml
+        - waitForOdometry && roslaunch octomap_mapping_planning mapplan.launch config_octomap:=./custom_configs/octomap.yaml config_pcl_filter_ouster:=./custom_configs/ouster_filter_mapping.yaml config_pathfinder:=./custom_configs/pathfinder.yaml config_trajectory_generation:=./custom_configs/trajectory_generation.yaml 
+        - waitForOdometry && roslaunch octomap_project octomap_mapping.launch ns:=$UAV_NAME
+        - waitForOdometry && roslaunch simple_frontier explore.launch ns:=$UAV_NAME
+  # - map:
+  #     layout: tiled
+  #     panes:
+  #       - 'history -s rosservice call /uav1/octomap_server/save_map example'
+  #       - 'history -s rosservice call /uav1/octomap_server/load_map example'
+  # - goto:
+  #     layout: tiled
+  #     panes:
+  #       - 'history -s rosservice call /$UAV_NAME/pathfinder/goto \"goal: \[60.0, 0.0, 2.5, 0.0\]\";
+  #          history -s rosservice call /$UAV_NAME/pathfinder/goto \"goal: \[-60.0, 0.0, 2.5, 0.0\]\"'
   - takeoff:
       layout: tiled
       panes:
@@ -48,17 +51,17 @@ windows:
           rosservice call /$UAV_NAME/mavros/cmd/arming 1;
           sleep 2;
           rosservice call /$UAV_NAME/mavros/set_mode 0 offboard'
-  - rviz:
-      layout: tiled
-      panes:
+  # - rviz:
+  #     layout: tiled
+  #     panes:
         - waitForControl; rosrun rviz rviz -d ./rviz.rviz
         - waitForControl; roslaunch mrs_rviz_plugins load_robot.launch
-  - easy_control:
-      layout: tiled
-      panes:
-        - waitForControl; waitForControl; roslaunch mrs_uav_general logitech_joystick.launch
-        - waitForControl; waitForControl; roslaunch mrs_rviz_plugins rviz_interface.launch reference_service_name:='pathfinder/reference'
-  - layout:
-      layout: tiled
-      panes:
+  # - easy_control:
+  #     layout: tiled
+  #     panes:
+  #       - waitForControl; waitForControl; roslaunch mrs_uav_general logitech_joystick.launch
+  #       - waitForControl; waitForControl; roslaunch mrs_rviz_plugins rviz_interface.launch reference_service_name:='pathfinder/reference'
+  # - layout:
+  #     layout: tiled
+  #     panes:
         - waitForControl; sleep 3; ~/.i3/layout_manager.sh ./layout.json
